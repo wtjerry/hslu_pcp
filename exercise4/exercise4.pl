@@ -4,60 +4,35 @@
 :- use_module(library(clpfd)).
 :- consult(relationship).
 :- consult(sudoku).
+:- consult(problem).
 
+relationship_url('http://localhost:16316/problem/relationship/').
+sudoku_url('http://localhost:16316/problem/sudoku/').
 
 solve(relationship, Id) :-
-    get_relationship(Id, Type, Person1, Person2),
+    get_problem(relationship_url, Id, relationship(_, Type, Person1, Person2)),
     solve_relationship(Type, Person1, Person2, Result),
-    post_relationship(Result, Id),
+    send_solution(relationship_url, relationship_solution(Result, Id)),
     !.
-
 solve(sudoku, Id) :-
-    get_sudoku(Id, Sudoku),
-    solve_sudoku(Sudoku, Solution),
-    post_sudoku(Solution, Id),
-    !.
-
-solve(_, _) :-
-    write('Undefined problem type'),
+    get_problem(sudoku_url, Id, sudoku(_, Sudoku_0)),
+    replace_0(Sudoku_0, Sudoku),
+    sudoku(Sudoku),
+    send_solution(sudoku_url, sudoku_solution(Sudoku, Id)),
     !.
 
 
-% ---- solve relationship
-
-get_relationship(Id, Type, Person1, Person2) :-
-    atom_concat('http://localhost:16316/problem/relationship/', Id, Url),
-    http_get(Url, Reply, []),
-    json_to_prolog(Reply, relationship(_, Type, Person1, Person2)).
+% ---- relationship helpers
 
 solve_relationship(Type, Person1, Person2, true) :-
     call(Type, Person1, Person2),
     !.
-
 solve_relationship(Type, Person1, Person2, false) :-
     not(call(Type, Person1, Person2)),
     !.
 
-post_relationship(Boolean, Id) :-
-    prolog_to_json(relationship_solution(Boolean, Id), Json),
-    http_post('http://localhost:16316/problem/relationship', json(Json), _, []).
 
-
-% ---- solve sudoku
-
-get_sudoku(Id, Sudoku) :-
-    atom_concat('http://localhost:16316/problem/sudoku/', Id, Url),
-    http_get(Url, Reply, []),
-    json_to_prolog(Reply, sudoku(_, Sudoku)).
-
-solve_sudoku(Sudoku, Solution) :-
-    replace_0(Sudoku, Prepared_Sudoku),
-    sudoku(Prepared_Sudoku),
-    Solution = Prepared_Sudoku.
-
-post_sudoku(Solution, Id) :-
-    prolog_to_json(sudoku_solution(Solution, Id), Json),
-    http_post('http://localhost:16316/problem/sudoku', json(Json), _, []).
+% ---- sudoku helpers
 
 replace_0(In, Out) :-
     maplist(replace_0_in_list, In, Out).
