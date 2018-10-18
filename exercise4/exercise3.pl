@@ -10,7 +10,8 @@
 % +GERALD
 % -------
 %  ROBERT
-b([D,O,N,A,L,D] +  [G,E,R,A,L,D] = [R,O,B,E,R,T]) :-
+%  riddle(As + Bs = Cs).
+riddle([D,O,N,A,L,D] +  [G,E,R,A,L,D] = [R,O,B,E,R,T]) :-
     Vars = [D,O,N,A,L,G,E,R,B,T],
     Vars ins 0..9,
     all_distinct(Vars),
