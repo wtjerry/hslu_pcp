@@ -117,7 +117,7 @@
 (define a-list
   ((lambda (list-of-lists)
     (map (lambda (inner-list)
-           (append '(0) inner-list))
+           (cons 0 inner-list))
          list-of-lists))
   (list (list 1 2 3) (list 1 2) (list 1 2 3 4))))
 
@@ -146,4 +146,27 @@
              (display-list (rest l)))))
     )
     (display-list (calc-a-list-pure l side-a side-b))))
-  
+
+
+
+; 7 -------------------------------
+(define my-phone-dir (list (list 'Adam 4711) (list 'Eva 4712))) ; -> please use a struct!
+; (look-at my-phone-dir 'Adam)   ; -> 4711
+; (look-at my-phone-dir 'Erna)   ; -> #false
+; (add-entry 'Erna 4715)         ; -> (void)
+; (look-at my-phone-dir 'Erna)   ; -> 4715
+
+
+; a)
+; all functions should be without side effect
+
+; b)
+(define (look-at phone-dir name)
+  (cond
+    [(empty? phone-dir) #f]
+    [(eqv? name (first (first phone-dir))) (first (rest (first phone-dir)))]
+    [else (look-at (rest phone-dir) name)]))
+
+; c)
+(define (add-entry name number)
+  (set! my-phone-dir (cons (list name number) my-phone-dir)))
